@@ -1,0 +1,32 @@
+# A clean OpenAPI 3.2 schema, used as the reference / CI gate example.
+openapi: 3.2.1
+info:
+      title: Example API
+      version: 1.0.0
+paths:
+      /pets:
+            get:
+                  operationId: listPets
+                  responses:
+                        "200":
+                              description: OK
+                              content:
+                                    application/json:
+                                          schema:
+                                                type: array
+                                                items:
+                                                      $ref: "#/components/schemas/Pet"
+components:
+      schemas:
+            Pet:
+                  type: object
+                  required: [id]
+                  properties:
+                        id:
+                              type: integer
+                        name:
+                               type: ["string", "null"]
+                        bornAt:
+                              type: string
+                              format: date
+                              exclusiveMinimum: 0

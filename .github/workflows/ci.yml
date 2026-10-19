@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_call:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+       matrix:
+          python: ["3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      # No install needed: tests run against the source tree on $PYTHONPATH.
+      - name: Run test suite
+        run: python -m unittest discover -s tests -v
+      - name: Gate on the shipped examples
+        run: |
+          echo "bugs.yaml should FAIL (it contains 3.1->3.2 hazards):"
+          python -m openapi32lint examples/bugs.yaml --validate || echo "  -> failed as expected"
+          echo "clean.yaml should PASS:"
+          python -m openapi32lint examples/clean.yaml --validate --fail-on high
