@@ -44,7 +44,7 @@ never execute anything, escape the filesystem, or be exfiltrated.
 - It does not install or run any third-party code.
 
 ## Report a vulnerability
-Open an issue labelled `security` (or email `rzl` — update as the project grows).
+Open an issue labelled `security`, or reach the maintainer on GitHub (@InGarlicBreadWeTrust).
 Do not file anything that includes production secrets.
 
 ---
