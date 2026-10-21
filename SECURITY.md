@@ -46,3 +46,33 @@ never execute anything, escape the filesystem, or be exfiltrated.
 ## Report a vulnerability
 Open an issue labelled `security` (or email `rzl` — update as the project grows).
 Do not file anything that includes production secrets.
+
+---
+
+## Independent security audit (2026-10-21)
+
+**Performed by:** `InGarlicBreadWeTrust` · **Type:** static source + dependency
+review · **Result:** no vulnerabilities found.
+
+**Method:** static review of every `.py` source, the `pyproject.toml` build
+config, and the dependency graph; grep for the runtime-risk surface
+(`subprocess`, `os.system`, `eval`/`exec`/`compile`, `pickle`/`marshal`,
+`ctypes`, sockets/network).
+
+**Findings for `openapi-migrate-lint`:**
+- No `subprocess`, `os.system`, `exec`, `eval`, `compile`, `pickle`, `marshal`,
+  or `ctypes` present in any source.
+- No network I/O — the document's `http(s)://` external refs are **not** fetched;
+  they are retained as values only. No SSRF surface exists.
+- Untrusted-input handling is hard by design: PyYAML is used as
+  `yaml.safe_load` (never `full_load`), and dangerous `!!python/object`-class
+   tags are turned into a safe `LoadError` (covered by the object-tag block test).
+- Output-path containment (`_guard_output_path`) blocks traversal
+   (`--fix ../../etc/passwd`) unless `--allow-outside` is explicitly passed
+   (covered by the out-of-cwd guard tests).
+- Local `$ref` resolution is depth-bounded (`_REF_DEPTH`), so a pathological cycle
+   cannot hang the process.
+- Build system is stock `setuptools` build-meta; no custom hooks or side-effects.
+- No hardcoded secrets or credentials.
+
+**Verdict:** strong posture; no vulnerability found. No code changes required.
